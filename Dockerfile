@@ -8,11 +8,17 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+
+# Updated dependency installation with better error handling
 RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
+  if [ -f yarn.lock ]; then \
+    yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then \
+    npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then \
+    npm install -g pnpm && pnpm install --no-frozen-lockfile; \
+  else \
+    echo "No lockfile found. Installing with npm..." && npm install; \
   fi
 
 # Rebuild the source code only when needed
@@ -21,14 +27,18 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Disable Next.js telemetry during build
+ENV NEXT_TELEMETRY_DISABLED 1
+
 # Build the application
-RUN yarn build
+RUN npm run build
 
 # Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
