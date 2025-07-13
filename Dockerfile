@@ -11,6 +11,10 @@ RUN npm ci --omit=dev
 # Copy source code
 COPY . .
 
+# Debug: List contents of project root and lib directory
+RUN ls -la .
+RUN ls -la lib || echo "lib directory does not exist"
+
 # Debug: List contents of components/ui
 RUN ls -la components/ui
 
