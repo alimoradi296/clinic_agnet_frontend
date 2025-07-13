@@ -11,6 +11,9 @@ RUN npm ci --omit=dev
 # Copy source code
 COPY . .
 
+# Debug: List contents of components/ui
+RUN ls -la components/ui
+
 # Build the application
 RUN npm run build
 
