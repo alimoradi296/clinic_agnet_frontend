@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Medical AI Chat - دستیار هوشمند پزشکی",
   description: "AI Assistant for Medical Clinic - دستیار هوشمند برای کلینیک پزشکی",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
