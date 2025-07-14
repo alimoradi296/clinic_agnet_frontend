@@ -3,20 +3,13 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --omit=dev
+# Install dependencies (including dev dependencies for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
-
-# Debug: List contents of project root and lib directory
-RUN ls -la .
-RUN ls -la lib || echo "lib directory does not exist"
-
-# Debug: List contents of components/ui
-RUN ls -la components/ui
 
 # Build the application
 RUN npm run build
