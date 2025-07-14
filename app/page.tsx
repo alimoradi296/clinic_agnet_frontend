@@ -90,7 +90,8 @@ export default function MedicalAIChat() {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [userType, setUserType] = useState<"doctor" | "patient">("doctor")
   const [userId, setUserId] = useState("")
-  const [apiUrl, setApiUrl] = useState(process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001")
+  const [dataApiUrl, setDataApiUrl] = useState(process.env.NEXT_PUBLIC_DATA_API_URL || "http://localhost:8001")
+  const [aiApiUrl, setAiApiUrl] = useState(process.env.NEXT_PUBLIC_AI_API_URL || "http://localhost:8001")
   const [connectionStatus, setConnectionStatus] = useState<"connected" | "disconnected" | "checking">("checking")
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [patients, setPatients] = useState<Patient[]>([])
@@ -112,12 +113,13 @@ export default function MedicalAIChat() {
 
   useEffect(() => {
     checkConnection()
-  }, [apiUrl])
+  }, [aiApiUrl]) // Check connection against the AI agent health endpoint
 
   const checkConnection = async () => {
     setConnectionStatus("checking")
     try {
-      const response = await fetch(`${apiUrl}/health`, {
+      const response = await fetch(`${aiApiUrl}/api/ai/health`, {
+        // Use AI agent health endpoint
         headers: {
           "api-key": "1",
         },
@@ -135,7 +137,7 @@ export default function MedicalAIChat() {
   const createSession = async () => {
     try {
       const response = await fetch(
-        `${apiUrl}/api/ai/sessions?test_user_id=${encodeURIComponent(userId)}&test_user_type=${userType}`,
+        `${aiApiUrl}/api/ai/sessions?test_user_id=${encodeURIComponent(userId)}&test_user_type=${userType}`,
         {
           method: "POST",
           headers: {
@@ -191,7 +193,7 @@ export default function MedicalAIChat() {
 
     try {
       const response = await fetch(
-        `${apiUrl}/api/ai/chat?test_user_id=${encodeURIComponent(userId)}&test_user_type=${userType}`,
+        `${aiApiUrl}/api/ai/chat?test_user_id=${encodeURIComponent(userId)}&test_user_type=${userType}`,
         {
           method: "POST",
           headers: {
@@ -268,7 +270,7 @@ export default function MedicalAIChat() {
 
   const fetchPatients = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/patients`, {
+      const response = await fetch(`${dataApiUrl}/api/patients`, {
         headers: { "api-key": "1" },
       })
       if (response.ok) {
@@ -282,7 +284,7 @@ export default function MedicalAIChat() {
 
   const fetchDoctors = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/doctors`, {
+      const response = await fetch(`${dataApiUrl}/api/doctors`, {
         headers: { "api-key": "1" },
       })
       if (response.ok) {
@@ -296,7 +298,7 @@ export default function MedicalAIChat() {
 
   const fetchAppointments = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/appointments`, {
+      const response = await fetch(`${dataApiUrl}/api/appointments`, {
         headers: { "api-key": "1" },
       })
       if (response.ok) {
@@ -310,7 +312,7 @@ export default function MedicalAIChat() {
 
   const fetchMedicalRecords = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/medical-records`, {
+      const response = await fetch(`${dataApiUrl}/api/medical-records`, {
         headers: { "api-key": "1" },
       })
       if (response.ok) {
@@ -324,7 +326,7 @@ export default function MedicalAIChat() {
 
   const addPatient = async (patientData: any) => {
     try {
-      const response = await fetch(`${apiUrl}/api/patients`, {
+      const response = await fetch(`${dataApiUrl}/api/patients`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -343,7 +345,7 @@ export default function MedicalAIChat() {
 
   const addAppointment = async (appointmentData: any) => {
     try {
-      const response = await fetch(`${apiUrl}/api/appointments`, {
+      const response = await fetch(`${dataApiUrl}/api/appointments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -362,7 +364,7 @@ export default function MedicalAIChat() {
 
   const addMedicalRecord = async (recordData: any) => {
     try {
-      const response = await fetch(`${apiUrl}/api/medical-records`, {
+      const response = await fetch(`${dataApiUrl}/api/medical-records`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -413,9 +415,9 @@ export default function MedicalAIChat() {
               <div>
                 <label className="block text-sm font-medium mb-2">آدرس سرور</label>
                 <Input
-                  value={apiUrl}
-                  onChange={(e) => setApiUrl(e.target.value)}
-                  placeholder="http://localhost:8001"
+                  value={aiApiUrl} // Display AI agent URL for user to configure
+                  onChange={(e) => setAiApiUrl(e.target.value)}
+                  placeholder="http://clinicaiagent.nikflow.ir"
                   className="text-left"
                   dir="ltr"
                 />
@@ -442,6 +444,16 @@ export default function MedicalAIChat() {
                   dir="ltr"
                 />
               </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">آدرس سرور داده‌ها</label>
+              <Input
+                value={dataApiUrl}
+                onChange={(e) => setDataApiUrl(e.target.value)}
+                placeholder="https://clinic-backend.nikflow.ir"
+                className="text-left"
+                dir="ltr"
+              />
             </div>
 
             <div className="flex items-center gap-4">
